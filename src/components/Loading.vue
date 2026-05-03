@@ -191,7 +191,7 @@ img {
 }
 
 .avatar_img {
-  height: clamp(340px, 21.25vw, 100vw);
-  width: clamp(250px, 15.625vw, 100vw);;
+  height: clamp(320px, 20vw, 100vw);
+  width: clamp(235px, 14.7vw, 100vw);
 }
 </style>
