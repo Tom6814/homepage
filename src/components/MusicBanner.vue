@@ -7,6 +7,7 @@ import { useConfig } from '@/composables/useConfig'
 const ap = ref(null)
 let audioObserver = null
 let rafId = 0
+let syncTimer = 0
 const songTimes = ref(0)
 const isMiniMode = ref(false)
 const currentSong = ref(null)
@@ -247,6 +248,18 @@ onMounted(() => {
     audioObserver = new MutationObserver(() => syncAudioEl())
     audioObserver.observe(host, { childList: true, subtree: true })
   }
+  if (!syncTimer) {
+    syncTimer = window.setInterval(() => {
+      syncAudioEl()
+      const el = audioEl.value || ap.value?.audio
+      if (!el) return
+      if (!isSeeking.value) currentTime.value = el.currentTime || 0
+      if (Number.isFinite(el.duration)) duration.value = el.duration
+      updateBuffered()
+      updateLyric()
+      isPlaying.value = !el.paused
+    }, 200)
+  }
   addRandomSong()
 
   checkScreenSize()
@@ -255,6 +268,10 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   detachAudio()
+  if (syncTimer) {
+    window.clearInterval(syncTimer)
+    syncTimer = 0
+  }
   if (audioObserver) {
     audioObserver.disconnect()
     audioObserver = null
