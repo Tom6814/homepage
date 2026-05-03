@@ -364,16 +364,11 @@ const percent = computed(() => {
   return Math.min(1, Math.max(0, currentTime.value / duration.value))
 })
 
-const currentLyricTriplet = computed(() => {
+const currentLyricLine = computed(() => {
   const lines = lrcLines.value
-  if (!lines.length) {
-    return { prev: '', current: '暂无歌词', next: '' }
-  }
+  if (!lines.length) return '暂无歌词'
   const idx = currentLyricIndex.value
-  const current = idx >= 0 ? lines[idx]?.text || '' : lines[0]?.text || ''
-  const prev = idx > 0 ? lines[idx - 1]?.text || '' : ''
-  const next = idx >= 0 && idx + 1 < lines.length ? lines[idx + 1]?.text || '' : ''
-  return { prev, current, next }
+  return (idx >= 0 ? lines[idx]?.text : lines[0]?.text) || '暂无歌词'
 })
 
 const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
@@ -418,9 +413,7 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
         </div>
 
         <div class="music-lrc">
-          <p class="music-lrc-line music-lrc-dim">{{ currentLyricTriplet.prev }}</p>
-          <p class="music-lrc-line music-lrc-current">{{ currentLyricTriplet.current }}</p>
-          <p class="music-lrc-line music-lrc-dim">{{ currentLyricTriplet.next }}</p>
+          <p class="music-lrc-line music-lrc-current">{{ currentLyricLine }}</p>
         </div>
 
         <div class="music-progress">
@@ -666,10 +659,6 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
   font-size: clamp(13px, 0.8125vw, 100vw);
   font-weight: 700;
   opacity: 0.95;
-}
-
-.music-lrc-dim {
-  opacity: 0.55;
 }
 
 .music-progress {
