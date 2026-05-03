@@ -393,9 +393,11 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
         <div class="music-meta">
           <div class="music-title">
             <span class="music-title-text">{{ currentSong?.name || '加载中…' }}</span>
-            <span class="music-artist">{{ currentSong?.artist || '' }}</span>
+            <div class="music-subrow">
+              <span class="music-artist">{{ currentSong?.artist || '' }}</span>
+              <button class="music-next" type="button" @click.stop="nextSong">NEXT</button>
+            </div>
           </div>
-          <button class="music-next" type="button" @click.stop="nextSong">NEXT</button>
         </div>
 
         <div class="music-lrc">
@@ -577,6 +579,13 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
   gap: 2px;
 }
 
+.music-subrow {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 0.625vw, 100vw);
+  min-width: 0;
+}
+
 .music-title-text {
   display: block;
   max-width: 100%;
@@ -595,6 +604,8 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
 }
 
 .music-next {
@@ -621,6 +632,8 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
 }
 
 .music-lrc-line {
+  display: block;
+  max-width: 100%;
   text-align: left;
   line-height: 1.2;
   margin: 0;
