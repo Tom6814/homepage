@@ -403,13 +403,9 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
 
       <div v-if="!showMini" class="music-main">
         <div class="music-meta">
-          <div class="music-title">
-            <span class="music-title-text">{{ currentSong?.name || '加载中…' }}</span>
-            <div class="music-subrow">
-              <span class="music-artist">{{ currentSong?.artist || '' }}</span>
-              <button class="music-next" type="button" @click.stop="nextSong">NEXT</button>
-            </div>
-          </div>
+          <span class="music-title-text">{{ currentSong?.name || '加载中…' }}</span>
+          <span class="music-artist">{{ currentSong?.artist || '' }}</span>
+          <button class="music-next" type="button" @click.stop="nextSong">NEXT</button>
         </div>
 
         <div class="music-lrc">
@@ -572,50 +568,41 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
 }
 
 .music-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: clamp(10px, 0.625vw, 100vw);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  column-gap: clamp(10px, 0.625vw, 100vw);
+  row-gap: 2px;
   min-width: 0;
-}
-
-.music-title {
-  min-width: 0;
-  flex: 1;
   overflow: hidden;
-  color: #003153;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.music-subrow {
-  display: flex;
-  align-items: center;
-  gap: clamp(10px, 0.625vw, 100vw);
-  min-width: 0;
 }
 
 .music-title-text {
   display: block;
   max-width: 100%;
+  min-width: 0;
   font-size: clamp(18px, 1.125vw, 100vw);
   font-weight: 700;
+  color: #003153;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  grid-column: 1;
+  grid-row: 1;
 }
 
 .music-artist {
   display: block;
   max-width: 100%;
+  min-width: 0;
   font-size: clamp(13px, 0.8125vw, 100vw);
   opacity: 0.7;
+  color: #003153;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  min-width: 0;
-  flex: 1;
+  grid-column: 1;
+  grid-row: 2;
 }
 
 .music-next {
@@ -630,6 +617,10 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
   font-size: clamp(12px, 0.75vw, 100vw);
   font-weight: 700;
   flex: 0 0 auto;
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: end;
+  align-self: center;
 }
 
 .music-lrc {
