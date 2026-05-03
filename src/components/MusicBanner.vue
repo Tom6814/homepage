@@ -592,8 +592,9 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
 .music-subrow {
   display: flex;
   align-items: center;
-  gap: clamp(10px, 0.625vw, 100vw);
+  justify-content: space-between;
   min-width: 0;
+  width: 100%;
 }
 
 .music-title-text {
@@ -630,6 +631,7 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
   font-size: clamp(12px, 0.75vw, 100vw);
   font-weight: 700;
   flex: 0 0 auto;
+  margin-left: clamp(10px, 0.625vw, 100vw);
 }
 
 .music-lrc {
