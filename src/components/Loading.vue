@@ -76,7 +76,7 @@ setInterval(() => {
   0% {
     transform: translateY(0);
   }
-  50% {
+  48% {
     transform: translateY(-26.6666666672px);
   }
   100% {
@@ -93,7 +93,7 @@ setInterval(() => {
 }
 
 .loading {
-  animation: move 2s ease-in-out infinite;
+  animation: move 1.55s cubic-bezier(0.55, 0, 0.45, 1) infinite;
   width: 100%;
 }
 
