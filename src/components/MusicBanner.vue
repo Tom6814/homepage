@@ -6,6 +6,7 @@ import { useConfig } from '@/composables/useConfig'
 
 const ap = ref(null)
 let audioObserver = null
+let rafId = 0
 const songTimes = ref(0)
 const isMiniMode = ref(false)
 const currentSong = ref(null)
@@ -110,10 +111,31 @@ const handleDurationChange = () => {
 
 const handlePlay = () => {
   isPlaying.value = true
+  if (!rafId) {
+    const tick = () => {
+      const el = audioEl.value || ap.value?.audio
+      if (el) {
+        if (!isSeeking.value) currentTime.value = el.currentTime || 0
+        duration.value = Number.isFinite(el.duration) ? el.duration : duration.value
+        updateBuffered()
+        updateLyric()
+      }
+      if (isPlaying.value) {
+        rafId = window.requestAnimationFrame(tick)
+      } else {
+        rafId = 0
+      }
+    }
+    rafId = window.requestAnimationFrame(tick)
+  }
 }
 
 const handlePause = () => {
   isPlaying.value = false
+  if (rafId) {
+    window.cancelAnimationFrame(rafId)
+    rafId = 0
+  }
 }
 
 const detachAudio = () => {
@@ -125,6 +147,10 @@ const detachAudio = () => {
   el.removeEventListener('play', handlePlay)
   el.removeEventListener('pause', handlePause)
   audioEl.value = null
+  if (rafId) {
+    window.cancelAnimationFrame(rafId)
+    rafId = 0
+  }
 }
 
 const attachAudio = (el) => {
@@ -138,6 +164,7 @@ const attachAudio = (el) => {
   handleDurationChange()
   handleTimeUpdate()
   isPlaying.value = !el.paused
+  if (isPlaying.value) handlePlay()
 }
 
 const syncAudioEl = () => {
@@ -342,8 +369,9 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
     <div
       class="music-card"
       :class="{ 'music-card-mini': showMini, 'music-card-seeking': isSeeking }"
+      @click="togglePlay"
     >
-      <button class="music-cover" type="button" @click="togglePlay">
+      <button class="music-cover" type="button" @click.stop="togglePlay">
         <img
           v-if="currentSong?.cover"
           class="music-cover-img"
@@ -365,9 +393,11 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
         <div class="music-meta">
           <div class="music-title">
             <span class="music-title-text">{{ currentSong?.name || '加载中…' }}</span>
-            <span class="music-artist">{{ currentSong?.artist || '' }}</span>
+            <div class="music-subrow">
+              <span class="music-artist">{{ currentSong?.artist || '' }}</span>
+              <button class="music-next" type="button" @click.stop="nextSong">NEXT</button>
+            </div>
           </div>
-          <button class="music-next" type="button" @click="nextSong">NEXT</button>
         </div>
 
         <div class="music-lrc">
@@ -377,7 +407,12 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
         </div>
 
         <div class="music-progress">
-          <div ref="progressRef" class="music-bar" @pointerdown="onSeekPointerDown">
+          <div
+            ref="progressRef"
+            class="music-bar"
+            @pointerdown.stop.prevent="onSeekPointerDown"
+            @click.stop
+          >
             <div class="music-bar-track"></div>
             <div class="music-bar-loaded" :style="{ width: `${buffered * 100}%` }"></div>
             <div class="music-bar-played" :style="{ width: `${percent * 100}%` }"></div>
@@ -531,18 +566,29 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
   align-items: center;
   justify-content: space-between;
   gap: clamp(10px, 0.625vw, 100vw);
+  min-width: 0;
 }
 
 .music-title {
   min-width: 0;
   flex: 1;
+  overflow: hidden;
   color: #003153;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
+.music-subrow {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 0.625vw, 100vw);
+  min-width: 0;
+}
+
 .music-title-text {
+  display: block;
+  max-width: 100%;
   font-size: clamp(18px, 1.125vw, 100vw);
   font-weight: 700;
   white-space: nowrap;
@@ -551,11 +597,15 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
 }
 
 .music-artist {
+  display: block;
+  max-width: 100%;
   font-size: clamp(13px, 0.8125vw, 100vw);
   opacity: 0.7;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
 }
 
 .music-next {
@@ -582,6 +632,8 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
 }
 
 .music-lrc-line {
+  display: block;
+  max-width: 100%;
   text-align: left;
   line-height: 1.2;
   margin: 0;
