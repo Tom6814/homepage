@@ -403,8 +403,10 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
 
       <div v-if="!showMini" class="music-main">
         <div class="music-meta">
-          <span class="music-title-text">{{ currentSong?.name || '加载中…' }}</span>
-          <span class="music-artist">{{ currentSong?.artist || '' }}</span>
+          <div class="music-meta-text">
+            <span class="music-title-text">{{ currentSong?.name || '加载中…' }}</span>
+            <span class="music-artist">{{ currentSong?.artist || '' }}</span>
+          </div>
           <button class="music-next" type="button" @click.stop="nextSong">NEXT</button>
         </div>
 
@@ -564,18 +566,25 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
   display: flex;
   flex-direction: column;
   gap: clamp(8px, 0.5vw, 100vw);
+  --next-inset: clamp(30px, 2vw, 100vw);
+  --next-width: clamp(60px, 3.75vw, 100vw);
+  --next-gap: clamp(10px, 0.625vw, 100vw);
   background-size: contain;
   background: #f0f0f0 var(--deco1) no-repeat right;
 }
 
 .music-meta {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-rows: auto auto;
-  column-gap: clamp(10px, 0.625vw, 100vw);
-  row-gap: 2px;
+  position: relative;
   min-width: 0;
   overflow: hidden;
+}
+
+.music-meta-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: calc(var(--next-inset) + var(--next-width) + var(--next-gap));
 }
 
 .music-title-text {
@@ -588,8 +597,6 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  grid-column: 1;
-  grid-row: 1;
 }
 
 .music-artist {
@@ -602,26 +609,23 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  grid-column: 1;
-  grid-row: 2;
 }
 
 .music-next {
+  position: absolute;
+  right: var(--next-inset);
+  top: 50%;
+  transform: translateY(-50%);
   border: 0;
   background: #daeef5;
   color: #003153;
   border-radius: clamp(4px, 0.25vw, 100vw);
   padding: 0 clamp(10px, 0.625vw, 100vw);
   height: clamp(26px, 1.625vw, 100vw);
-  transform: none;
+  width: var(--next-width);
   cursor: pointer;
   font-size: clamp(12px, 0.75vw, 100vw);
   font-weight: 700;
-  flex: 0 0 auto;
-  grid-column: 2;
-  grid-row: 2;
-  justify-self: end;
-  align-self: center;
 }
 
 .music-lrc {
