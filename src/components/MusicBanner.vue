@@ -383,53 +383,55 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
       :class="{ 'music-card-mini': showMini, 'music-card-seeking': isSeeking }"
       @click="togglePlay"
     >
-      <button class="music-cover" type="button" @click.stop="togglePlay">
-        <img
-          v-if="currentSong?.cover"
-          class="music-cover-img"
-          :src="currentSong.cover"
-          alt=""
-        />
-        <div class="music-cover-mask"></div>
-        <div class="music-cover-btn">
-          <svg v-if="!isPlaying" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M8 5v14l12-7z" />
-          </svg>
-          <svg v-else viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M6 5h4v14H6zM14 5h4v14h-4z" />
-          </svg>
-        </div>
-      </button>
-
-      <div v-if="!showMini" class="music-main">
-        <div class="music-meta">
-          <span class="music-title-text">{{ currentSong?.name || '加载中…' }}</span>
-          <span class="music-artist">{{ currentSong?.artist || '' }}</span>
-          <div class="music-next-box">
-            <button class="music-next" type="button" @click.stop="nextSong">NEXT</button>
+      <div class="music-card-clip">
+        <button class="music-cover" type="button" @click.stop="togglePlay">
+          <img
+            v-if="currentSong?.cover"
+            class="music-cover-img"
+            :src="currentSong.cover"
+            alt=""
+          />
+          <div class="music-cover-mask"></div>
+          <div class="music-cover-btn">
+            <svg v-if="!isPlaying" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 5v14l12-7z" />
+            </svg>
+            <svg v-else viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 5h4v14H6zM14 5h4v14h-4z" />
+            </svg>
           </div>
-        </div>
+        </button>
 
-        <div class="music-lrc">
-          <p class="music-lrc-line music-lrc-current">{{ currentLyricLine }}</p>
-        </div>
-
-        <div class="music-progress">
-          <div
-            ref="progressRef"
-            class="music-bar"
-            @pointerdown.stop.prevent="onSeekPointerDown"
-            @click.stop
-          >
-            <div class="music-bar-track"></div>
-            <div class="music-bar-loaded" :style="{ width: `${buffered * 100}%` }"></div>
-            <div class="music-bar-played" :style="{ width: `${percent * 100}%` }"></div>
-            <div class="music-bar-thumb" :style="{ left: `${percent * 100}%` }"></div>
+        <div v-if="!showMini" class="music-main">
+          <div class="music-meta">
+            <span class="music-title-text">{{ currentSong?.name || '加载中…' }}</span>
+            <span class="music-artist">{{ currentSong?.artist || '' }}</span>
+            <div class="music-next-box">
+              <button class="music-next" type="button" @click.stop="nextSong">NEXT</button>
+            </div>
           </div>
-          <div class="music-time">
-            <span>{{ formatTime(currentTime) }}</span>
-            <span>/</span>
-            <span>{{ formatTime(duration) }}</span>
+
+          <div class="music-lrc">
+            <p class="music-lrc-line music-lrc-current">{{ currentLyricLine }}</p>
+          </div>
+
+          <div class="music-progress">
+            <div
+              ref="progressRef"
+              class="music-bar"
+              @pointerdown.stop.prevent="onSeekPointerDown"
+              @click.stop
+            >
+              <div class="music-bar-track"></div>
+              <div class="music-bar-loaded" :style="{ width: `${buffered * 100}%` }"></div>
+              <div class="music-bar-played" :style="{ width: `${percent * 100}%` }"></div>
+              <div class="music-bar-thumb" :style="{ left: `${percent * 100}%` }"></div>
+            </div>
+            <div class="music-time">
+              <span>{{ formatTime(currentTime) }}</span>
+              <span>/</span>
+              <span>{{ formatTime(duration) }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -460,12 +462,11 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
 .music-card {
   width: 100%;
   height: 100%;
-  background: #fffd;
   filter: drop-shadow(0px 0px clamp(3px, 0.1875vw, 100vw) #0003);
-  border-radius: var(--border-radius-large);
   transform: skew(-10deg);
   display: flex;
-  overflow: hidden;
+  position: relative;
+  overflow: visible;
   pointer-events: auto;
   transition: transform 0.3s;
 }
@@ -475,10 +476,22 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
 }
 
 .music-card-mini {
+  filter: drop-shadow(0px 0px clamp(3px, 0.1875vw, 100vw) #0003);
+}
+
+.music-card-clip {
+  width: 100%;
+  height: 100%;
+  background: #fffd;
+  border-radius: var(--border-radius-large);
+  overflow: hidden;
+  display: flex;
+}
+
+.music-card-mini .music-card-clip {
   border-radius: 100%;
   border: 2px white solid;
   background: transparent;
-  filter: drop-shadow(0px 0px clamp(3px, 0.1875vw, 100vw) #0003);
 }
 
 .aplayer-host {
@@ -573,16 +586,19 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
 }
 
 .music-meta {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--next-width);
-  grid-template-rows: auto auto;
-  column-gap: var(--next-gap);
-  row-gap: 2px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
+  padding-right: calc(var(--next-width) + var(--next-gap));
 }
 
 .music-next-box {
+  position: absolute;
+  right: 0;
+  bottom: 0;
   width: var(--next-width);
   height: clamp(26px, 1.625vw, 100vw);
   background: #daeef5;
@@ -590,9 +606,6 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
   display: flex;
   align-items: center;
   justify-content: center;
-  grid-column: 2;
-  grid-row: 2;
-  justify-self: end;
 }
 
 .music-title-text {
@@ -605,8 +618,6 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  grid-column: 1 / 3;
-  grid-row: 1;
 }
 
 .music-artist {
@@ -619,8 +630,6 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  grid-column: 1;
-  grid-row: 2;
 }
 
 .music-next {
