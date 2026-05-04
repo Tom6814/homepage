@@ -23,7 +23,7 @@ const imgList = [
   'https://webcnstatic.yostar.net/ba_cn_web/prod/web/assets/avatar4.8656c817.png'
 ]
 const avatarEl = ref(null)
-const moveDurationMs = 1350
+const moveDurationMs = 1150
 const bottomAt = 0.35
 let swapTimeoutId = 0
 
@@ -165,7 +165,7 @@ img {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  margin-top: clamp(32px, 2vw, 100vw);
+  margin-top: clamp(22px, 1.375vw, 100vw);
 }
 
 .progress_wrapper .title {
@@ -226,5 +226,6 @@ img {
 .avatar_img {
   height: clamp(320px, 20vw, 100vw);
   width: clamp(235px, 14.7vw, 100vw);
+  transform: translateX(clamp(10px, 0.625vw, 100vw));
 }
 </style>
