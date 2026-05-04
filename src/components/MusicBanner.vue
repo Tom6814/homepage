@@ -383,52 +383,59 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
       :class="{ 'music-card-mini': showMini, 'music-card-seeking': isSeeking }"
       @click="togglePlay"
     >
-      <button class="music-cover" type="button" @click.stop="togglePlay">
-        <img
-          v-if="currentSong?.cover"
-          class="music-cover-img"
-          :src="currentSong.cover"
-          alt=""
-        />
-        <div class="music-cover-mask"></div>
-        <div class="music-cover-btn">
-          <svg v-if="!isPlaying" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M8 5v14l12-7z" />
-          </svg>
-          <svg v-else viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M6 5h4v14H6zM14 5h4v14h-4z" />
-          </svg>
-        </div>
-      </button>
+      <div class="music-card-clip">
+        <button class="music-cover" type="button" @click.stop="togglePlay">
+          <img
+            v-if="currentSong?.cover"
+            class="music-cover-img"
+            :src="currentSong.cover"
+            alt=""
+          />
+          <div class="music-cover-mask"></div>
+          <div class="music-cover-btn">
+            <svg v-if="!isPlaying" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 5v14l12-7z" />
+            </svg>
+            <svg v-else viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 5h4v14H6zM14 5h4v14h-4z" />
+            </svg>
+          </div>
+        </button>
 
-      <div v-if="!showMini" class="music-main">
-        <div class="music-meta">
-          <span class="music-title-text">{{ currentSong?.name || '加载中…' }}</span>
-          <span class="music-artist">{{ currentSong?.artist || '' }}</span>
+        <div v-if="!showMini" class="music-main">
+          <div class="music-meta">
+            <span class="music-title-text">{{ currentSong?.name || '加载中…' }}</span>
+            <span class="music-artist">{{ currentSong?.artist || '' }}</span>
+          </div>
+
+          <div class="music-lrc">
+            <p class="music-lrc-line music-lrc-current">{{ currentLyricLine }}</p>
+          </div>
+
+          <div class="music-progress">
+            <div
+              ref="progressRef"
+              class="music-bar"
+              @pointerdown.stop.prevent="onSeekPointerDown"
+              @click.stop
+            >
+              <div class="music-bar-track"></div>
+              <div class="music-bar-loaded" :style="{ width: `${buffered * 100}%` }"></div>
+              <div class="music-bar-played" :style="{ width: `${percent * 100}%` }"></div>
+              <div class="music-bar-thumb" :style="{ left: `${percent * 100}%` }"></div>
+            </div>
+            <div class="music-time">
+              <span>{{ formatTime(currentTime) }}</span>
+              <span>/</span>
+              <span>{{ formatTime(duration) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="!showMini" class="music-next-overlay">
+        <div class="music-next-box">
           <button class="music-next" type="button" @click.stop="nextSong">NEXT</button>
-        </div>
-
-        <div class="music-lrc">
-          <p class="music-lrc-line music-lrc-current">{{ currentLyricLine }}</p>
-        </div>
-
-        <div class="music-progress">
-          <div
-            ref="progressRef"
-            class="music-bar"
-            @pointerdown.stop.prevent="onSeekPointerDown"
-            @click.stop
-          >
-            <div class="music-bar-track"></div>
-            <div class="music-bar-loaded" :style="{ width: `${buffered * 100}%` }"></div>
-            <div class="music-bar-played" :style="{ width: `${percent * 100}%` }"></div>
-            <div class="music-bar-thumb" :style="{ left: `${percent * 100}%` }"></div>
-          </div>
-          <div class="music-time">
-            <span>{{ formatTime(currentTime) }}</span>
-            <span>/</span>
-            <span>{{ formatTime(duration) }}</span>
-          </div>
         </div>
       </div>
     </div>
@@ -458,14 +465,20 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
 .music-card {
   width: 100%;
   height: 100%;
-  background: #fffd;
   filter: drop-shadow(0px 0px clamp(3px, 0.1875vw, 100vw) #0003);
-  border-radius: var(--border-radius-large);
   transform: skew(-10deg);
   display: flex;
-  overflow: hidden;
+  position: relative;
+  overflow: visible;
   pointer-events: auto;
   transition: transform 0.3s;
+  --next-width: clamp(60px, 3.75vw, 100vw);
+  --next-height: clamp(26px, 1.625vw, 100vw);
+  --next-gap: clamp(10px, 0.625vw, 100vw);
+  --music-pad-top: clamp(12px, 0.75vw, 100vw);
+  --music-pad-right: clamp(22px, 1.375vw, 100vw);
+  --title-size: clamp(18px, 1.125vw, 100vw);
+  --meta-gap: 2px;
 }
 
 .music-card:active {
@@ -473,10 +486,24 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
 }
 
 .music-card-mini {
+  filter: drop-shadow(0px 0px clamp(3px, 0.1875vw, 100vw) #0003);
+}
+
+.music-card-clip {
+  width: 100%;
+  height: 100%;
+  background: #fffd;
+  border-radius: var(--border-radius-large);
+  overflow: hidden;
+  display: flex;
+  position: relative;
+  z-index: 1;
+}
+
+.music-card-mini .music-card-clip {
   border-radius: 100%;
   border: 2px white solid;
   background: transparent;
-  filter: drop-shadow(0px 0px clamp(3px, 0.1875vw, 100vw) #0003);
 }
 
 .aplayer-host {
@@ -558,7 +585,8 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
 .music-main {
   flex: 1;
   height: 100%;
-  padding: clamp(12px, 0.75vw, 100vw) clamp(14px, 0.875vw, 100vw);
+  padding: clamp(12px, 0.75vw, 100vw) clamp(22px, 1.375vw, 100vw) clamp(12px, 0.75vw, 100vw)
+    clamp(14px, 0.875vw, 100vw);
   transform: skew(10deg);
   display: flex;
   flex-direction: column;
@@ -568,13 +596,33 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
 }
 
 .music-meta {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-rows: auto auto;
-  column-gap: clamp(10px, 0.625vw, 100vw);
-  row-gap: 2px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
+  padding-right: calc(var(--next-width) + var(--next-gap));
+}
+
+.music-next-overlay {
+  position: absolute;
+  right: var(--music-pad-right);
+  top: calc(var(--music-pad-top) + var(--title-size) + var(--meta-gap));
+  transform: skew(10deg);
+  transform-origin: top right;
+  z-index: 3;
+  pointer-events: auto;
+}
+
+.music-next-box {
+  width: var(--next-width);
+  height: var(--next-height);
+  background: #daeef5;
+  border-radius: clamp(4px, 0.25vw, 100vw);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .music-title-text {
@@ -587,8 +635,6 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  grid-column: 1;
-  grid-row: 1;
 }
 
 .music-artist {
@@ -601,26 +647,18 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  grid-column: 1;
-  grid-row: 2;
 }
 
 .music-next {
   border: 0;
-  background: #daeef5;
+  background: transparent;
   color: #003153;
-  border-radius: clamp(4px, 0.25vw, 100vw);
   padding: 0 clamp(10px, 0.625vw, 100vw);
-  height: clamp(26px, 1.625vw, 100vw);
-  transform: skew(-10deg);
+  height: 100%;
+  width: 100%;
   cursor: pointer;
   font-size: clamp(12px, 0.75vw, 100vw);
   font-weight: 700;
-  flex: 0 0 auto;
-  grid-column: 2;
-  grid-row: 2;
-  justify-self: end;
-  align-self: center;
 }
 
 .music-lrc {
