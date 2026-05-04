@@ -612,7 +612,7 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
   border-radius: clamp(4px, 0.25vw, 100vw);
   padding: 0 clamp(10px, 0.625vw, 100vw);
   height: clamp(26px, 1.625vw, 100vw);
-  transform: skew(-10deg);
+  transform: none;
   cursor: pointer;
   font-size: clamp(12px, 0.75vw, 100vw);
   font-weight: 700;
