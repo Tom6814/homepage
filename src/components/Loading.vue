@@ -226,5 +226,6 @@ img {
 .avatar_img {
   height: clamp(320px, 20vw, 100vw);
   width: clamp(235px, 14.7vw, 100vw);
+  transform: translateX(clamp(10px, 0.625vw, 100vw));
 }
 </style>
