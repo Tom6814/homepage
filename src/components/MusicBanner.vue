@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount, computed, nextTick } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed, nextTick, watch } from 'vue'
 import axios from 'axios'
 import APlayer from 'aplayer'
 import { useConfig } from '@/composables/useConfig'
@@ -20,6 +20,10 @@ const lrcLines = ref([])
 const currentLyricIndex = ref(-1)
 const progressRef = ref(null)
 const isSeeking = ref(false)
+const nextPlaceholderRef = ref(null)
+const nextOverlay = ref({ left: 0, top: 0, width: 0, height: 0, visible: false })
+let nextResizeObserver = null
+let nextRaf = 0
 
 const { configs } = useConfig()
 const ifICP = computed(() => configs.value?.ICP || '')
@@ -27,6 +31,21 @@ const songlist = computed(() => configs.value?.banner?.musicID || [])
 
 const checkScreenSize = () => {
   isMiniMode.value = window.innerWidth <= 768
+}
+
+const updateNextOverlay = () => {
+  if (nextRaf) cancelAnimationFrame(nextRaf)
+  nextRaf = requestAnimationFrame(() => {
+    if (showMini.value) {
+      nextOverlay.value = { left: 0, top: 0, width: 0, height: 0, visible: false }
+      return
+    }
+    const el = nextPlaceholderRef.value
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    if (!r.width || !r.height) return
+    nextOverlay.value = { left: r.left, top: r.top, width: r.width, height: r.height, visible: true }
+  })
 }
 
 const formatTime = (sec) => {
@@ -264,6 +283,11 @@ onMounted(() => {
 
   checkScreenSize()
   window.addEventListener('resize', checkScreenSize)
+  window.addEventListener('resize', updateNextOverlay)
+  window.addEventListener('scroll', updateNextOverlay, { passive: true })
+  nextResizeObserver = new ResizeObserver(updateNextOverlay)
+  if (nextPlaceholderRef.value) nextResizeObserver.observe(nextPlaceholderRef.value)
+  updateNextOverlay()
 })
 
 onBeforeUnmount(() => {
@@ -277,10 +301,23 @@ onBeforeUnmount(() => {
     audioObserver = null
   }
   window.removeEventListener('resize', checkScreenSize)
+  window.removeEventListener('resize', updateNextOverlay)
+  window.removeEventListener('scroll', updateNextOverlay)
+  if (nextResizeObserver) {
+    nextResizeObserver.disconnect()
+    nextResizeObserver = null
+  }
+  if (nextRaf) cancelAnimationFrame(nextRaf)
   window.removeEventListener('pointermove', seekFromEvent)
   if (ap.value) {
     ap.value.destroy()
   }
+})
+
+watch([currentSong, showMini], async () => {
+  await nextTick()
+  if (nextResizeObserver && nextPlaceholderRef.value) nextResizeObserver.observe(nextPlaceholderRef.value)
+  updateNextOverlay()
 })
 
 const fetchSongData = async (songId) => {
@@ -406,9 +443,7 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
           <div class="music-meta">
             <span class="music-title-text">{{ currentSong?.name || '加载中…' }}</span>
             <span class="music-artist">{{ currentSong?.artist || '' }}</span>
-            <div class="music-next-box">
-              <button class="music-next" type="button" @click.stop="nextSong">NEXT</button>
-            </div>
+            <div ref="nextPlaceholderRef" class="music-next-placeholder" aria-hidden="true"></div>
           </div>
 
           <div class="music-lrc">
@@ -434,6 +469,21 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div
+      v-if="!showMini && nextOverlay.visible"
+      class="music-next-overlay"
+      :style="{
+        left: `${nextOverlay.left}px`,
+        top: `${nextOverlay.top}px`,
+        width: `${nextOverlay.width}px`,
+        height: `${nextOverlay.height}px`
+      }"
+    >
+      <div class="music-next-box">
+        <button class="music-next" type="button" @click.stop="nextSong">NEXT</button>
       </div>
     </div>
   </div>
@@ -595,12 +645,24 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
   padding-right: calc(var(--next-width) + var(--next-gap));
 }
 
-.music-next-box {
-  position: absolute;
-  right: 0;
-  bottom: 0;
+.music-next-placeholder {
   width: var(--next-width);
   height: clamp(26px, 1.625vw, 100vw);
+  align-self: flex-end;
+  flex: 0 0 auto;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.music-next-overlay {
+  position: fixed;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.music-next-box {
+  width: 100%;
+  height: 100%;
   background: #daeef5;
   border-radius: clamp(4px, 0.25vw, 100vw);
   display: flex;
