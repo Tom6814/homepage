@@ -558,7 +558,8 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
 .music-main {
   flex: 1;
   height: 100%;
-  padding: clamp(12px, 0.75vw, 100vw) clamp(14px, 0.875vw, 100vw);
+  padding: clamp(12px, 0.75vw, 100vw) clamp(22px, 1.375vw, 100vw) clamp(12px, 0.75vw, 100vw)
+    clamp(14px, 0.875vw, 100vw);
   transform: skew(10deg);
   display: flex;
   flex-direction: column;
