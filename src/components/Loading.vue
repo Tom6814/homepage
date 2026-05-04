@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useResourceLoader } from '@/composables/useResourceLoader'
 
 const props = defineProps(['percent'])
@@ -22,23 +22,46 @@ const imgList = [
   'https://webcnstatic.yostar.net/ba_cn_web/prod/web/assets/avatar3.c9d108f1.png',
   'https://webcnstatic.yostar.net/ba_cn_web/prod/web/assets/avatar4.8656c817.png'
 ]
+const avatarEl = ref(null)
+const moveDurationMs = 1350
+const bottomAt = 0.35
+let swapTimeoutId = 0
 
 document.oncontextmenu = function () {
   return false
 }
 let a = 0
-imgUrl.value = imgList[a % 4]
-a++
-setInterval(() => {
-  imgUrl.value = imgList[a % 4]
+const setNextImage = () => {
+  imgUrl.value = imgList[a % imgList.length]
   a++
-}, 2000)
+}
+
+const scheduleSwapAtBottom = () => {
+  if (swapTimeoutId) window.clearTimeout(swapTimeoutId)
+  swapTimeoutId = window.setTimeout(() => setNextImage(), moveDurationMs * bottomAt)
+}
+
+const handleIteration = () => {
+  scheduleSwapAtBottom()
+}
+
+setNextImage()
+
+onMounted(() => {
+  scheduleSwapAtBottom()
+  avatarEl.value?.addEventListener('animationiteration', handleIteration)
+})
+
+onBeforeUnmount(() => {
+  if (swapTimeoutId) window.clearTimeout(swapTimeoutId)
+  avatarEl.value?.removeEventListener('animationiteration', handleIteration)
+})
 </script>
 
 <template>
-  <div class="loading_wrapper">
+  <div class="loading_wrapper" :style="{ '--move-duration': `${moveDurationMs}ms` }">
     <div ref="loadingImg" class="avatar_img bounce-top">
-      <img class="loading" :src="imgUrl" alt="" />
+      <img ref="avatarEl" class="loading" :src="imgUrl" alt="" />
       <div class="hide">
         <img :src="imgList[0]" alt="" />
         <img :src="imgList[1]" alt="" />
@@ -74,26 +97,36 @@ setInterval(() => {
 <style scoped>
 @keyframes move {
   0% {
-    transform: translateY(0);
-  }
-  48% {
     transform: translateY(-26.6666666672px);
+    animation-timing-function: cubic-bezier(0.42, 0, 1, 1);
+  }
+  35% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
   }
   100% {
-    transform: translateY(0);
+    transform: translateY(-26.6666666672px);
   }
 }
 
 @media screen and (min-width: 1600px) {
   @keyframes move {
-    50% {
+    0% {
+      transform: translateY(-1.6666666667vw);
+      animation-timing-function: cubic-bezier(0.42, 0, 1, 1);
+    }
+    35% {
+      transform: translateY(0);
+      animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    }
+    100% {
       transform: translateY(-1.6666666667vw);
     }
   }
 }
 
 .loading {
-  animation: move 1.55s cubic-bezier(0.55, 0, 0.45, 1) infinite;
+  animation: move var(--move-duration) linear infinite;
   width: 100%;
 }
 
