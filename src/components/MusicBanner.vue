@@ -407,7 +407,9 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
             <span class="music-title-text">{{ currentSong?.name || '加载中…' }}</span>
             <span class="music-artist">{{ currentSong?.artist || '' }}</span>
           </div>
-          <button class="music-next" type="button" @click.stop="nextSong">NEXT</button>
+          <div class="music-next-box">
+            <button class="music-next" type="button" @click.stop="nextSong">NEXT</button>
+          </div>
         </div>
 
         <div class="music-lrc">
@@ -587,6 +589,20 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
   padding-right: calc(var(--next-inset) + var(--next-width) + var(--next-gap));
 }
 
+.music-next-box {
+  position: absolute;
+  right: var(--next-inset);
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--next-width);
+  height: clamp(26px, 1.625vw, 100vw);
+  background: #daeef5;
+  border-radius: clamp(4px, 0.25vw, 100vw);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .music-title-text {
   display: block;
   max-width: 100%;
@@ -612,17 +628,12 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
 }
 
 .music-next {
-  position: absolute;
-  right: var(--next-inset);
-  top: 50%;
-  transform: translateY(-50%);
   border: 0;
-  background: #daeef5;
+  background: transparent;
   color: #003153;
-  border-radius: clamp(4px, 0.25vw, 100vw);
   padding: 0 clamp(10px, 0.625vw, 100vw);
-  height: clamp(26px, 1.625vw, 100vw);
-  width: var(--next-width);
+  height: 100%;
+  width: 100%;
   cursor: pointer;
   font-size: clamp(12px, 0.75vw, 100vw);
   font-weight: 700;
