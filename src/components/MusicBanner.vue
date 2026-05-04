@@ -403,10 +403,8 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
 
       <div v-if="!showMini" class="music-main">
         <div class="music-meta">
-          <div class="music-meta-text">
-            <span class="music-title-text">{{ currentSong?.name || '加载中…' }}</span>
-            <span class="music-artist">{{ currentSong?.artist || '' }}</span>
-          </div>
+          <span class="music-title-text">{{ currentSong?.name || '加载中…' }}</span>
+          <span class="music-artist">{{ currentSong?.artist || '' }}</span>
           <div class="music-next-box">
             <button class="music-next" type="button" @click.stop="nextSong">NEXT</button>
           </div>
@@ -568,7 +566,6 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
   display: flex;
   flex-direction: column;
   gap: clamp(8px, 0.5vw, 100vw);
-  --next-inset: clamp(30px, 2vw, 100vw);
   --next-width: clamp(60px, 3.75vw, 100vw);
   --next-gap: clamp(10px, 0.625vw, 100vw);
   background-size: contain;
@@ -576,24 +573,16 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
 }
 
 .music-meta {
-  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--next-width);
+  grid-template-rows: auto auto;
+  column-gap: var(--next-gap);
+  row-gap: 2px;
   min-width: 0;
   overflow: hidden;
 }
 
-.music-meta-text {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding-right: calc(var(--next-inset) + var(--next-width) + var(--next-gap));
-}
-
 .music-next-box {
-  position: absolute;
-  right: var(--next-inset);
-  top: 50%;
-  transform: translateY(-50%);
   width: var(--next-width);
   height: clamp(26px, 1.625vw, 100vw);
   background: #daeef5;
@@ -601,6 +590,9 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
   display: flex;
   align-items: center;
   justify-content: center;
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: end;
 }
 
 .music-title-text {
@@ -613,6 +605,8 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  grid-column: 1 / 3;
+  grid-row: 1;
 }
 
 .music-artist {
@@ -625,6 +619,8 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  grid-column: 1;
+  grid-row: 2;
 }
 
 .music-next {
