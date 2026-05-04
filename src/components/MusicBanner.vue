@@ -620,6 +620,7 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
   height: var(--next-height);
   background: #daeef5;
   border-radius: clamp(4px, 0.25vw, 100vw);
+  transform: skew(-10deg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -659,6 +660,7 @@ const showMini = computed(() => Boolean(ifICP.value) || isMiniMode.value)
   cursor: pointer;
   font-size: clamp(12px, 0.75vw, 100vw);
   font-weight: 700;
+  transform: skew(10deg);
 }
 
 .music-lrc {
